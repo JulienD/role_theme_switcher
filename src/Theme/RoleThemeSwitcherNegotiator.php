@@ -15,6 +15,8 @@ class RoleThemeSwitcherNegotiator implements ThemeNegotiatorInterface {
 
   /**
    * Protected theme variable to store the theme to active.
+   *
+   * @var string
    */
   protected $theme = NULL;
 
@@ -70,8 +72,8 @@ class RoleThemeSwitcherNegotiator implements ThemeNegotiatorInterface {
     // Gets theme roles from the configuration.
     $roles = $this->configFactory->get('role_theme_switcher.settings')->get('roles');
     if ($roles) {
-      uasort($roles, function($a, $b) {
-        $r =  $a['weight'] - $b['weight'];
+      uasort($roles, function ($a, $b) {
+        $r = $a['weight'] - $b['weight'];
         return $r;
       });
 
