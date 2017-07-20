@@ -1,9 +1,16 @@
 {
   "name": "drupal/role_theme_switcher",
-  "description": "A Drupal module to allow administrator define specific theme per role.",
+  "description": "Assign a specific theme for different roles.",
   "type": "drupal-module",
-  "license": "GPL-2.0+",
   "homepage": "https://github.com/JulienD/role_theme_switcher",
+  "keywords": [
+    "Drupal",
+    "Drupal 8",
+    "Theme"
+  ],
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "authors": [
     {
       "name": "Julien Dubreuil",
@@ -12,5 +19,12 @@
   ],
   "support": {
     "issues": "https://github.com/JulienD/role_theme_switcher/issues"
-  }
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  ],
+  "require": {}
 }

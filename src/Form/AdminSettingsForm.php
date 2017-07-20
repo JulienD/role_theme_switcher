@@ -63,8 +63,7 @@ class AdminSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-
-    $form = parent::buildForm($form, $form_state);
+    $themes = $this->getThemeList();
 
     $form['role_theme_switcher'] = [
       '#type' => 'table',
@@ -77,6 +76,7 @@ class AdminSettingsForm extends ConfigFormBase {
       '#empty' => $this->t('There are no items yet. Add roles.'),
       '#tabledrag' => [
         [
+          'table_id' => 'edit-role-theme-switcher',
           'action' => 'order',
           'relationship' => 'sibling',
           'group' => 'role-order-weight',
@@ -84,23 +84,21 @@ class AdminSettingsForm extends ConfigFormBase {
       ],
     ];
 
-    // Generates a form element for each role.
     $roles = $this->getUserRoles();
     foreach ($roles as $rid => $role) {
-
       $form['role_theme_switcher'][$rid]['#attributes']['class'][] = 'draggable';
       $form['role_theme_switcher'][$rid]['#weight'] = $role['weight'];
 
       // Role name col.
-      $form['role_theme_switcher'][$rid]['role'] =[
-        '#plain_text' => $role['name']
+      $form['role_theme_switcher'][$rid]['role'] = [
+        '#plain_text' => $role['name'],
       ];
 
       // Theme col.
       $form['role_theme_switcher'][$rid]['theme'] = [
         '#type' => 'select',
         '#title' => $this->t('Select Theme'),
-        '#options' => $this->getThemeList(),
+        '#options' => $themes,
         '#empty_option' => $this->t('Default theme'),
         '#empty_value' => '',
         '#default_value' => $role['theme'],
@@ -117,8 +115,7 @@ class AdminSettingsForm extends ConfigFormBase {
       ];
     }
 
-    $form['actions']['submit']['#tableselect'] = TRUE;
-    return $form;
+    return parent::buildForm($form, $form_state);
   }
 
   /**
@@ -135,8 +132,7 @@ class AdminSettingsForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
 
     $data = [];
-    $roles = user_role_names();
-    foreach ($roles as $rid => $role) {
+    foreach (user_role_names() as $rid => $role) {
       $data[$rid] = $form_state->getValue('role_theme_switcher')[$rid];
     }
 
@@ -144,15 +140,13 @@ class AdminSettingsForm extends ConfigFormBase {
   }
 
   /**
-   * Gets a list of available Roles.
+   * Generates a list of roles.
    *
-   * @return array
-   *   Returns an array of Roles.
+   * @return array[]
+   *   An array represent a list of roles ordered by weight.
    */
   private function getUserRoles() {
-
     $values = [];
-
     $config = $this->config('role_theme_switcher.settings')->get('roles');
 
     $roles = user_role_names();
@@ -160,15 +154,17 @@ class AdminSettingsForm extends ConfigFormBase {
       $values[$rid] = [
         'rid' => $rid,
         'name' => $name,
-        'weight' => $config[$rid]['weight'] ? (int) $config[$rid]['weight'] : 0,
+        'weight' => $config[$rid]['weight'] ? $config[$rid]['weight'] : 0,
         'theme' => $config[$rid]['theme'] ? $config[$rid]['theme'] : '',
       ];
     }
 
-    uasort($values, function ($a, $b) {
-      $r = $a['weight'] - $b['weight'];
-      return $r;
-    });
+    // We need to order properly all rows on initial render like.
+    // @see \Drupal\Core\Config\Entity\ConfigEntityListBuilder::load().
+    uasort($values, [
+      'Drupal\Component\Utility\SortArray',
+      'sortByWeightElement',
+    ]);
 
     return $values;
   }
@@ -176,16 +172,13 @@ class AdminSettingsForm extends ConfigFormBase {
   /**
    * Gets a list of active themes without hidden ones.
    *
-   * @return array
-   *   An array with all active themes.
+   * @return array[]
+   *   An array with all compatible active themes.
    */
   private function getThemeList() {
-
     $themes_list = [];
-
-    $installed_themes = $this->themeHandler->listInfo();
-    foreach ($installed_themes as $theme) {
-      // Exclude theme defined as hidden.
+    $themes = $this->themeHandler->listInfo();
+    foreach ($themes as $theme) {
       if (!empty($theme->info['hidden'])) {
         continue;
       }

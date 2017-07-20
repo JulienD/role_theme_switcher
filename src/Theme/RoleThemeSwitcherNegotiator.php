@@ -68,8 +68,6 @@ class RoleThemeSwitcherNegotiator implements ThemeNegotiatorInterface {
    *   decide.
    */
   public function applies(RouteMatchInterface $route_match) {
-
-    // Gets theme roles from the configuration.
     $roles = $this->configFactory->get('role_theme_switcher.settings')->get('roles');
     if ($roles) {
       uasort($roles, function ($a, $b) {
@@ -78,7 +76,6 @@ class RoleThemeSwitcherNegotiator implements ThemeNegotiatorInterface {
       });
 
       $user_roles = $this->currentUser->getRoles();
-
       foreach ($roles as $rid => $config) {
         if (in_array($rid, $user_roles)) {
           $this->theme = $config['theme'];
