@@ -70,10 +70,12 @@ class RoleThemeSwitcherNegotiator implements ThemeNegotiatorInterface {
   public function applies(RouteMatchInterface $route_match) {
     $roles = $this->configFactory->get('role_theme_switcher.settings')->get('roles');
     if ($roles) {
-      uasort($roles, function ($a, $b) {
-        $r = $a['weight'] - $b['weight'];
-        return $r;
-      });
+
+      // Properly order all rows by weight.
+      uasort($roles, [
+        'Drupal\Component\Utility\SortArray',
+        'sortByWeightElement',
+      ]);
 
       $user_roles = $this->currentUser->getRoles();
       foreach ($roles as $rid => $config) {

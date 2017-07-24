@@ -159,8 +159,7 @@ class AdminSettingsForm extends ConfigFormBase {
       ];
     }
 
-    // We need to order properly all rows on initial render like.
-    // @see \Drupal\Core\Config\Entity\ConfigEntityListBuilder::load().
+    // Properly order all rows by weight.
     uasort($values, [
       'Drupal\Component\Utility\SortArray',
       'sortByWeightElement',
